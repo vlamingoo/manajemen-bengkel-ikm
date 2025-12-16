@@ -1,31 +1,72 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\SparepartController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard - Semua role bisa akses
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Profile - Semua role bisa akses
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // CRUD Customer - Admin & Karyawan
+    Route::middleware(['role:admin,karyawan'])->group(function () {
+        Route::resource('customers', CustomerController::class);
+    });
+    
+    // CRUD Vehicle - Admin & Karyawan
+    Route::middleware(['role:admin,karyawan'])->group(function () {
+        Route::resource('vehicles', VehicleController::class);
+    });
+    
+    // CRUD Sparepart - Admin & Karyawan
+    Route::middleware(['role:admin,karyawan'])->group(function () {
+        Route::resource('spareparts', SparepartController::class);
+    });
+    
+    // CRUD Transaction - Admin & Karyawan (Owner hanya bisa lihat)
+    Route::middleware(['role:admin,karyawan'])->group(function () {
+        Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
+        Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+        Route::get('/transactions/{transaction}/edit', [TransactionController::class, 'edit'])->name('transactions.edit');
+        Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
+        Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    });
+    
+    // Lihat transaksi - Semua role
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+
+    // CRUD User - Khusus Admin ONLY
+    Route::middleware(['role:admin'])->group(function () {
+        Route::resource('users', UserController::class);
+    });
+
+    // Laporan - Owner & Admin
+Route::middleware(['role:owner,admin'])->group(function () {
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/pendapatan', [LaporanController::class, 'pendapatan'])->name('laporan.pendapatan');
+    Route::get('/laporan/sparepart', [LaporanController::class, 'sparepart'])->name('laporan.sparepart');
+    Route::get('/laporan/pelanggan', [LaporanController::class, 'pelanggan'])->name('laporan.pelanggan');
+    Route::get('/laporan/grafik', [LaporanController::class, 'grafik'])->name('laporan.grafik');
+});
+    
+    // AJAX untuk get vehicles by customer
+    Route::get('/get-vehicles/{customerId}', [TransactionController::class, 'getVehicles']);
 });
 
 require __DIR__.'/auth.php';
