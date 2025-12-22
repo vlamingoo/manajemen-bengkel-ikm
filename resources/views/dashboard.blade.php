@@ -175,6 +175,9 @@
                     <h3 class="card-title">
                         <i class="fas fa-exclamation-triangle text-danger mr-1"></i>
                         Stok Menipis
+                        @if($totalSparepartMenurun > 0)
+                        <span class="badge badge-danger">{{ $totalSparepartMenurun }}</span>
+                    @endif
                     </h3>
                     <div class="card-tools">
                         <a href="{{ route('spareparts.index') }}" class="btn btn-sm btn-warning">

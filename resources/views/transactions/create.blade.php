@@ -222,7 +222,23 @@
     $('#addSparepart').click(function() {
         let options = '<option value="">-- Pilih Sparepart --</option>';
         sparepartData.forEach(function(sp) {
-            options += `<option value="${sp.id}" data-harga="${sp.harga}">${sp.nama_sparepart} (Stok: ${sp.stok})</option>`;
+            // Cek stok
+            let disabled = sp.stok === 0 ? 'disabled' : '';
+            let badge = '';
+            
+            if (sp.stok === 0) {
+                badge = '❌ STOK HABIS';
+            } else if (sp.stok < 5) {
+                badge = '🔴 KRITIS (Stok: ' + sp.stok + ')';
+            } else if (sp.stok < 10) {
+                badge = '⚠️ MENIPIS (Stok: ' + sp.stok + ')';
+            } else {
+                badge = '✅ (Stok: ' + sp.stok + ')';
+            }
+            
+            options += `<option value="${sp.id}" data-harga="${sp.harga}" ${disabled}>
+                ${sp.nama_sparepart} ${badge}
+            </option>`;
         });
 
         let newRow = `

@@ -40,6 +40,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         
+        // Tambah: Hitung total sparepart yang menipis
+        $totalSparepartMenurun = Sparepart::where('stok', '<', 10)->count();
+        
         // Data untuk chart - Transaksi per bulan (6 bulan terakhir)
         $chartData = Transaction::select(
                 DB::raw('MONTH(tanggal_servis) as bulan'),
@@ -66,7 +69,8 @@ class DashboardController extends Controller
             'chartData',
             'transaksiProses',
             'transaksiSelesai',
-            'transaksiDiambil'
+            'transaksiDiambil',
+            'totalSparepartMenurun',
         ));
     }
 }

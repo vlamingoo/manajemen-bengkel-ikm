@@ -16,8 +16,8 @@ return new class extends Migration
             $table->date('tanggal_servis');
             $table->text('keluhan');
             $table->text('tindakan')->nullable();
-            $table->decimal('biaya_jasa', 10, 2)->default(0);
-            $table->decimal('total_biaya', 10, 2)->default(0);
+            $table->decimal('biaya_jasa', 15, 2)->default(0);
+            $table->decimal('total_biaya', 15, 2)->default(0);
             $table->enum('status', ['proses', 'selesai', 'diambil'])->default('proses');
             $table->text('keterangan')->nullable();
             $table->timestamps();
