@@ -35,7 +35,7 @@
                     <select name="role" class="form-control @error('role') is-invalid @enderror" required>
                         <option value="">-- Pilih Role --</option>
                         <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="karyawan" {{ old('role') == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                        <option value="finance" {{ old('role') == 'finance' ? 'selected' : '' }}>Finance</option>
                         <option value="owner" {{ old('role') == 'owner' ? 'selected' : '' }}>Owner</option>
                     </select>
                     @error('role')

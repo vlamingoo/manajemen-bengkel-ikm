@@ -23,23 +23,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // CRUD Customer - Admin & Karyawan
-    Route::middleware(['role:admin,karyawan'])->group(function () {
+    // CRUD Customer - Admin & finance
+    Route::middleware(['role:admin,finance'])->group(function () {
         Route::resource('customers', CustomerController::class);
     });
     
-    // CRUD Vehicle - Admin & Karyawan
-    Route::middleware(['role:admin,karyawan'])->group(function () {
+    // CRUD Vehicle - Admin & finance
+    Route::middleware(['role:admin,finance'])->group(function () {
         Route::resource('vehicles', VehicleController::class);
     });
     
-    // CRUD Sparepart - Admin & Karyawan
-    Route::middleware(['role:admin,karyawan'])->group(function () {
+    // CRUD Sparepart - Admin & finance
+    Route::middleware(['role:admin,finance'])->group(function () {
         Route::resource('spareparts', SparepartController::class);
     });
     
-    // CRUD Transaction - Admin & Karyawan (Owner hanya bisa lihat)
-    Route::middleware(['role:admin,karyawan'])->group(function () {
+    // CRUD Transaction - Admin & finance (Owner hanya bisa lihat)
+    Route::middleware(['role:admin,finance'])->group(function () {
         Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
         Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
         Route::get('/transactions/{transaction}/edit', [TransactionController::class, 'edit'])->name('transactions.edit');
@@ -56,8 +56,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class);
     });
 
-    // Laporan - Owner & Admin
-Route::middleware(['role:owner,admin'])->group(function () {
+    // Laporan - Owner, Admin & Finance
+    Route::middleware(['role:owner,admin,finance'])->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/pendapatan', [LaporanController::class, 'pendapatan'])->name('laporan.pendapatan');
     Route::get('/laporan/sparepart', [LaporanController::class, 'sparepart'])->name('laporan.sparepart');

@@ -321,43 +321,87 @@ return [
         'icon' => 'fas fa-fw fa-tachometer-alt',
     ],
     ['header' => 'MENU UTAMA'],
-    // Data Master - Hanya Admin & Karyawan
-    [
-        'text'    => 'Data Master',
-        'icon'    => 'fas fa-fw fa-database',
-        'can' => 'admin|karyawan',
-        'submenu' => [
-            [
-                'text' => 'Data Pelanggan',
-                'route'  => 'customers.index',
-                'icon' => 'fas fa-fw fa-users',
-            ],
-            [
-                'text' => 'Data Kendaraan',
-                'route'  => 'vehicles.index',
-                'icon' => 'fas fa-fw fa-car',
-            ],
-            [
-                'text' => 'Data Sparepart',
-                'route'  => 'spareparts.index', 
-                'icon' => 'fas fa-fw fa-box',
-            ],
+
+// ========== FINANCE ==========
+[
+    'text'    => 'Data Master',
+    'icon'    => 'fas fa-fw fa-database',
+    'can'     => 'finance',
+    'submenu' => [
+        [
+            'text'  => 'Data Sparepart',
+            'route' => 'spareparts.index', 
+            'icon'  => 'fas fa-fw fa-box',
         ],
     ],
-    // Transaksi Servis - Semua role bisa lihat
-    [
-    'text' => 'Transaksi Servis',
-    'route'  => 'transactions.index', 
-    'icon' => 'fas fa-fw fa-wrench',
-    ],
-    // Laporan - Khusus Owner & Admin
-    [
-        'text' => 'Laporan',
-        'route'  => 'laporan.index',
-        'icon' => 'fas fa-fw fa-chart-bar',
-        'can' => 'owner|admin',
+],
+[
+    'text'  => 'Data Transaksi',
+    'route' => 'transactions.index', 
+    'icon'  => 'fas fa-fw fa-wrench',
+    'can'   => 'finance',
+],
+[
+    'text'  => 'Data Laporan',
+    'route' => 'laporan.index',
+    'icon'  => 'fas fa-fw fa-chart-bar',
+    'can'   => 'finance',
+],
+
+// ========== ADMIN ==========
+[
+    'text'    => 'Data Master',
+    'icon'    => 'fas fa-fw fa-database',
+    'can'     => 'admin',
+    'submenu' => [
+        [
+            'text'  => 'Data Pelanggan',
+            'route' => 'customers.index',
+            'icon'  => 'fas fa-fw fa-users',
+        ],
+        [
+            'text'  => 'Data Kendaraan',
+            'route' => 'vehicles.index',
+            'icon'  => 'fas fa-fw fa-car',
+        ],
+        [
+            'text'  => 'Data Transaksi Servis',
+            'route' => 'transactions.index', 
+            'icon'  => 'fas fa-fw fa-wrench',
+        ],
     ],
 ],
+[
+    'text'  => 'Kelola User',
+    'route' => 'users.index',
+    'icon'  => 'fas fa-fw fa-user-cog',
+    'can'   => 'admin',
+],
+
+// ========== OWNER ==========
+[
+    'text'  => 'Semua Data',
+    'icon'  => 'fas fa-fw fa-folder-open',
+    'can'   => 'owner',
+    'submenu' => [
+        [
+            'text'  => 'Data Sparepart',
+            'route' => 'spareparts.index', 
+            'icon'  => 'fas fa-fw fa-box',
+        ],
+        [
+            'text'  => 'Data Transaksi',
+            'route' => 'transactions.index',
+            'icon'  => 'fas fa-fw fa-wrench',
+        ],
+        [
+            'text'  => 'Data Laporan',
+            'route' => 'laporan.index',
+            'icon'  => 'fas fa-fw fa-chart-bar',
+        ],
+    ],
+],
+    ],
 
     /*
     |--------------------------------------------------------------------------

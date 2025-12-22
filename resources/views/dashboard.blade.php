@@ -170,14 +170,12 @@
 
         {{-- Stok Sparepart Menipis --}}
         <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header border-0">
-                    <h3 class="card-title">
-                        <i class="fas fa-exclamation-triangle text-danger mr-1"></i>
-                        Stok Menipis
-                        @if($totalSparepartMenurun > 0)
-                        <span class="badge badge-danger">{{ $totalSparepartMenurun }}</span>
-                    @endif
+            <div class="card border-danger">
+                <div class="card-header bg-danger border-0">
+                    <h3 class="card-title text-white">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Peringatan Stok Menipis!
+                        <span class="badge badge-light ml-2">{{ $totalSparepartMenurun }}</span>
                     </h3>
                     <div class="card-tools">
                         <a href="{{ route('spareparts.index') }}" class="btn btn-sm btn-warning">
@@ -186,27 +184,119 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
+                    <div class="alert alert-warning m-3 mb-2">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>{{ $totalSparepartMenurun }}</strong> sparepart memerlukan perhatian!
+                    </div>
                     <ul class="list-group list-group-flush">
-                        @forelse($sparepartsMenurun as $sparepart)
+                        @foreach($sparepartsMenurun as $sparepart)
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <strong>{{ $sparepart->nama_sparepart }}</strong>
                                         <br>
                                         <small class="text-muted">{{ $sparepart->kode_sparepart }}</small>
+                                        <br>
+                                        {{-- BAHAYA/URGENT (stok < 3) --}}
+                                        @if($sparepart->stok < 3)
+                                            <span class="badge badge-danger">
+                                                <i class="fas fa-times-circle"></i> URGENT - SEGERA RESTOCK!
+                                            </span>
+                                            <br>
+                                            <small class="text-danger">
+                                                <i class="fas fa-exclamation-triangle"></i> Harus restock HARI INI/BESOK
+                                            </small>
+                                        {{-- KRITIS (stok 4-7) --}}
+                                        @elseif($sparepart->stok >= 4 && $sparepart->stok <= 7)
+                                            <span class="badge" style="background-color: #FF8C00; color: white;">
+                                                <i class="fas fa-exclamation-circle"></i> KRITIS
+                                            </span>
+                                            <br>
+                                            <small style="color: #FF8C00;">
+                                                <i class="fas fa-clock"></i> Harus restock MINGGU INI
+                                            </small>
+                                        {{-- MENIPIS (stok 8-15) --}}
+                                        @elseif($sparepart->stok >= 8 && $sparepart->stok <= 15)
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> MENIPIS
+                                            </span>
+                                            <br>
+                                            <small class="text-warning">
+                                                <i class="fas fa-calendar-alt"></i> Monitor dan planning restock
+                                            </small>
+                                        {{-- AMAN (stok > 15) --}}
+                                        @else
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check-circle"></i> AMAN
+                                            </span>
+                                        @endif
                                     </div>
-                                    <span class="badge badge-danger badge-pill" style="font-size: 14px;">
-                                        {{ $sparepart->stok }}
-                                    </span>
+                                    <div class="text-right">
+                                        {{-- Right-hand pill badge with colors per threshold --}}
+                                        @if($sparepart->stok < 3)
+                                            <span class="badge badge-danger badge-pill" style="font-size: 16px; padding: 8px 12px;">
+                                                {{ $sparepart->stok }}
+                                            </span>
+                                            <br>
+                                            <small class="text-danger" style="font-weight: bold;">
+                                                <i class="fas fa-ban"></i> DISABLED
+                                            </small>
+                                        @elseif($sparepart->stok >= 4 && $sparepart->stok <= 7)
+                                            <span class="badge badge-pill" style="background-color: #FF8C00; color: white; font-size: 16px; padding: 8px 12px;">
+                                                {{ $sparepart->stok }}
+                                            </span>
+                                            <br>
+                                            <small style="color: #FF8C00;">
+                                                <i class="fas fa-exclamation-triangle"></i> Dapat dipilih + warning
+                                            </small>
+                                        @elseif($sparepart->stok >= 8 && $sparepart->stok <= 15)
+                                            <span class="badge badge-warning badge-pill" style="font-size: 16px; padding: 8px 12px;">
+                                                {{ $sparepart->stok }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-check"></i> Bisa dipilih normal
+                                            </small>
+                                        @else
+                                            <span class="badge badge-success badge-pill" style="font-size: 16px; padding: 8px 12px;">
+                                                {{ $sparepart->stok }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </li>
-                        @empty
-                            <li class="list-group-item text-center text-muted">
-                                <i class="fas fa-check-circle text-success"></i> 
-                                Semua stok aman!
-                            </li>
-                        @endforelse
+                        @endforeach
                     </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <small>
+                                <span class="badge badge-danger">URGENT</span><br>
+                                <strong>Stok &lt; 3</strong><br>
+                                <i class="fas fa-ban"></i> Tidak bisa dipilih
+                            </small>
+                        </div>
+                        <div class="col-4">
+                            <small>
+                                <span class="badge" style="background-color: #FF8C00; color: white;">KRITIS</span><br>
+                                <strong>Stok 4-7</strong><br>
+                                <i class="fas fa-exclamation-triangle"></i> Bisa + warning
+                            </small>
+                        </div>
+                        <div class="col-4">
+                            <small>
+                                <span class="badge badge-warning">MENIPIS</span><br>
+                                <strong>Stok 8-15</strong><br>
+                                <i class="fas fa-check"></i> Normal
+                            </small>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-clock"></i> Segera lakukan restock untuk sparepart di atas
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -224,8 +314,8 @@
             </div>
             <div class="card-body" style="padding: 30px;">
                 <div class="row">
-                    {{-- Tombol Transaksi - Admin & Karyawan ONLY --}}
-                    @role('admin', 'karyawan')
+                    {{-- Tombol Transaksi - Admin & finance ONLY --}}
+                    @role('admin', 'finance')
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('transactions.create') }}" class="btn btn-primary btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-plus-circle" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
@@ -234,8 +324,8 @@
                         </div>
                     @endrole
                     
-                    {{-- Tombol Pelanggan - Admin & Karyawan ONLY --}}
-                    @role('admin', 'karyawan')
+                    {{-- Tombol Pelanggan - Admin & finance ONLY --}}
+                    @role('admin', 'finance')
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('customers.create') }}" class="btn btn-info btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-user-plus" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
@@ -244,8 +334,8 @@
                         </div>
                     @endrole
                     
-                    {{-- Tombol Kendaraan - Admin & Karyawan ONLY --}}
-                    @role('admin', 'karyawan')
+                    {{-- Tombol Kendaraan - Admin & finance ONLY --}}
+                    @role('admin', 'finance')
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('vehicles.create') }}" class="btn btn-warning btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-car" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
@@ -254,8 +344,8 @@
                         </div>
                     @endrole
                     
-                    {{-- Tombol Sparepart - Admin & Karyawan ONLY --}}
-                    @role('admin', 'karyawan')
+                    {{-- Tombol Sparepart - Admin & finance ONLY --}}
+                    @role('admin', 'finance')
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('spareparts.create') }}" class="btn btn-success btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-box" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>

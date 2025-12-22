@@ -139,44 +139,121 @@
                     </tbody>
                 </table>
                 
-                <div class="mt-3">
-                    <div class="row">
-                        <div class="col-md-8 text-right">
-                            <strong>Total Sparepart:</strong>
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" id="totalSparepart" class="form-control" value="Rp 0" readonly>
-                        </div>
+                {{-- Total Sparepart & Total Biaya Servis --}}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-money-bill-wave"></i> Total Biaya
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered mb-0">
+                            <tr>
+                                <th width="70%">Total Sparepart:</th>
+                                <td>
+                                    <input type="text" id="totalSparepart" class="form-control-plaintext font-weight-bold" value="Rp 0" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Total Biaya Jasa:</th>
+                                <td>
+                                    <input type="text" id="totalBiayaJasaDisplay" class="form-control-plaintext font-weight-bold" value="Rp 0" readonly>
+                                </td>
+                            </tr>
+                            <tr class="bg-light">
+                                <th style="font-size: 18px;">TOTAL BIAYA SERVIS:</th>
+                                <td>
+                                    <input type="text" id="totalBiayaServis" class="form-control-plaintext font-weight-bold text-success" value="Rp 0" readonly style="font-size: 20px;">
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Biaya --}}
+        {{-- Biaya Servis --}}
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Biaya Servis</h3>
+                <h3 class="card-title">
+                    <i class="fas fa-calculator"></i> Biaya Servis
+                </h3>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    {{-- 1. Biaya Jasa (Dropdown) --}}
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <label>Biaya Jasa <span class="text-danger">*</span></label>
-                            <input type="number" name="biaya_jasa" id="biaya_jasa" 
-                                   class="form-control @error('biaya_jasa') is-invalid @enderror" 
-                                   value="{{ old('biaya_jasa', 0) }}" min="0" step="1000" required>
-                            @error('biaya_jasa')
+                            <label>1. Biaya Jasa <span class="text-danger">*</span></label>
+                            <select name="jenis_servis_id" id="jenis_servis" class="form-control @error('jenis_servis_id') is-invalid @enderror" required>
+                                <option value="">-- Pilih Jenis Servis --</option>
+                                @foreach($jenisServis as $servis)
+                                    <option 
+                                        value="{{ $servis['id'] }}"
+                                        data-tarif="{{ $servis['tarif'] }}"
+                                        data-satuan="{{ $servis['satuan'] }}"
+                                    >
+                                        {{ $servis['nama'] }} (Rp {{ number_format($servis['tarif'], 0, ',', '.') }}/{{ $servis['satuan'] }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('jenis_servis_id')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
+
+                    {{-- 2. Waktu Pengerjaan (Input Manual) --}}
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <label>Total Biaya</label>
-                            <input type="text" id="totalBiaya" class="form-control font-weight-bold text-success" 
-                                   value="Rp 0" readonly style="font-size: 18px;">
+                            <label>2. Waktu Pengerjaan <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" 
+                                    name="waktu_pengerjaan" 
+                                    id="waktu_pengerjaan" 
+                                    class="form-control @error('waktu_pengerjaan') is-invalid @enderror" 
+                                    value="{{ old('waktu_pengerjaan', 1) }}"
+                                    min="0.5" 
+                                    step="0.5"
+                                    placeholder="Contoh: 2"
+                                    required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text" id="satuan_waktu">-</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted" id="hint_waktu">
+                                Pilih jenis servis terlebih dahulu
+                            </small>
+                            @error('waktu_pengerjaan')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
+
+                    {{-- 3. Total Biaya Jasa (Auto Calculate) --}}
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>3. Total Biaya Jasa</label>
+                            <input type="number" 
+                                name="biaya_jasa" 
+                                id="biaya_jasa" 
+                                class="form-control font-weight-bold" 
+                                value="0"
+                                readonly
+                                style="background-color: #ffffffff; font-size: 18px; color: #5f5d5dff;"
+                                required>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Auto-calculate
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Info Formula --}}
+                <div class="alert alert-info mb-0" id="formula_box" style="display: none;">
+                    <i class="fas fa-calculator"></i> 
+                    <strong>Formula:</strong> 
+                    <span id="formula_text"></span>
                 </div>
             </div>
         </div>
@@ -199,7 +276,85 @@
 <script>
     let sparepartData = @json($spareparts);
     let rowIndex = 0;
+    
+    // Data jenis servis dari config
+    let jenisServisData = @json($jenisServis);
 
+    // ========== BIAYA JASA CALCULATION ==========
+    
+    // Saat pilih jenis servis
+    $('#jenis_servis').change(function() {
+        let selected = $(this).find(':selected');
+        let tarif = selected.data('tarif') || 0;
+        let satuan = selected.data('satuan') || '';
+        
+        if(satuan) {
+            // Update satuan waktu
+            $('#satuan_waktu').text(satuan);
+            $('#hint_waktu').text(`Contoh: 1, 2, 3 ${satuan} (bisa desimal: 1.5, 2.5)`);
+            
+            // Hitung biaya jasa
+            hitungBiayaJasa();
+            
+            // Show formula
+            $('#formula_box').show();
+        } else {
+            $('#satuan_waktu').text('-');
+            $('#hint_waktu').text('Pilih jenis servis terlebih dahulu');
+            $('#biaya_jasa').val(0);
+            $('#formula_box').hide();
+            hitungTotalBiayaServis();
+        }
+    });
+    
+    // Saat input waktu pengerjaan
+    $('#waktu_pengerjaan').on('input', function() {
+        hitungBiayaJasa();
+    });
+    
+    // Fungsi hitung biaya jasa
+    function hitungBiayaJasa() {
+        let selected = $('#jenis_servis').find(':selected');
+        let tarif = selected.data('tarif') || 0;
+        let satuan = selected.data('satuan') || 'jam';
+        let waktu = parseFloat($('#waktu_pengerjaan').val()) || 0;
+        
+        let biayaJasa = tarif * waktu;
+        
+        // Update biaya jasa
+        $('#biaya_jasa').val(biayaJasa);
+        $('#totalBiayaJasaDisplay').val('Rp ' + formatRupiah(biayaJasa));
+        
+        // Update formula text
+        $('#formula_text').html(
+            'Rp ' + formatRupiah(tarif) + ' × ' + waktu + ' ' + satuan + 
+            ' = <strong>Rp ' + formatRupiah(biayaJasa) + '</strong>'
+        );
+        
+        // Hitung total biaya servis
+        hitungTotalBiayaServis();
+    }
+    
+    // Fungsi hitung total biaya servis (biaya jasa + sparepart)
+    function hitungTotalBiayaServis() {
+        let totalSparepart = 0;
+        
+        // Hitung total sparepart
+        $('.subtotal-display').each(function() {
+            let val = $(this).val().replace('Rp ', '').replace(/\./g, '');
+            totalSparepart += parseFloat(val) || 0;
+        });
+        
+        let biayaJasa = parseFloat($('#biaya_jasa').val()) || 0;
+        let totalBiayaServis = totalSparepart + biayaJasa;
+        
+        // Update display
+        $('#totalSparepart').val('Rp ' + formatRupiah(totalSparepart));
+        $('#totalBiayaServis').val('Rp ' + formatRupiah(totalBiayaServis));
+    }
+
+    // ========== SPAREPART MANAGEMENT (Existing Code) ==========
+    
     // Load vehicles saat customer dipilih
     $('#customer_id').change(function() {
         let customerId = $(this).val();
@@ -221,24 +376,27 @@
     // Tambah baris sparepart
     $('#addSparepart').click(function() {
         let options = '<option value="">-- Pilih Sparepart --</option>';
+        
+        if (sparepartData.length === 0) {
+            alert('Tidak ada data sparepart! Silakan tambah sparepart terlebih dahulu.');
+            return;
+        }
+        
         sparepartData.forEach(function(sp) {
-            // Cek stok
             let disabled = sp.stok === 0 ? 'disabled' : '';
             let badge = '';
             
             if (sp.stok === 0) {
-                badge = '❌ STOK HABIS';
+                badge = ' ❌ STOK HABIS';
             } else if (sp.stok < 5) {
-                badge = '🔴 KRITIS (Stok: ' + sp.stok + ')';
+                badge = ' 🔴 KRITIS (Stok: ' + sp.stok + ')';
             } else if (sp.stok < 10) {
-                badge = '⚠️ MENIPIS (Stok: ' + sp.stok + ')';
+                badge = ' ⚠️ MENIPIS (Stok: ' + sp.stok + ')';
             } else {
-                badge = '✅ (Stok: ' + sp.stok + ')';
+                badge = ' ✅ (Stok: ' + sp.stok + ')';
             }
             
-            options += `<option value="${sp.id}" data-harga="${sp.harga}" ${disabled}>
-                ${sp.nama_sparepart} ${badge}
-            </option>`;
+            options += `<option value="${sp.id}" data-harga="${sp.harga}" ${disabled}>${sp.nama_sparepart}${badge}</option>`;
         });
 
         let newRow = `
@@ -282,7 +440,7 @@
             $('#sparepartBody').html('<tr><td colspan="5" class="text-center text-muted">Belum ada sparepart dipilih</td></tr>');
         }
         
-        hitungTotal();
+        hitungTotalBiayaServis();
     });
 
     // Update harga saat sparepart dipilih
@@ -299,33 +457,13 @@
         hitungSubtotal(row);
     });
 
-    // Update total saat biaya jasa berubah
-    $('#biaya_jasa').on('input', function() {
-        hitungTotal();
-    });
-
     function hitungSubtotal(row) {
         let harga = parseFloat($(`.harga-input[data-row="${row}"]`).val()) || 0;
         let qty = parseFloat($(`.qty-input[data-row="${row}"]`).val()) || 0;
         let subtotal = harga * qty;
         
         $(`.subtotal-display[data-row="${row}"]`).val('Rp ' + formatRupiah(subtotal));
-        hitungTotal();
-    }
-
-    function hitungTotal() {
-        let totalSparepart = 0;
-        
-        $('.subtotal-display').each(function() {
-            let val = $(this).val().replace('Rp ', '').replace(/\./g, '');
-            totalSparepart += parseFloat(val) || 0;
-        });
-
-        let biayaJasa = parseFloat($('#biaya_jasa').val()) || 0;
-        let totalBiaya = totalSparepart + biayaJasa;
-
-        $('#totalSparepart').val('Rp ' + formatRupiah(totalSparepart));
-        $('#totalBiaya').val('Rp ' + formatRupiah(totalBiaya));
+        hitungTotalBiayaServis();
     }
 
     function formatRupiah(angka) {

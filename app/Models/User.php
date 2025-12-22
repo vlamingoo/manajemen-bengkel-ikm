@@ -43,9 +43,9 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function isKaryawan()
+    public function isFinance()
     {
-        return $this->role === 'karyawan';
+        return $this->role === 'finance';
     }
 
     public function isOwner()

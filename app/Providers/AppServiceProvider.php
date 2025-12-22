@@ -25,16 +25,16 @@ class AppServiceProvider extends ServiceProvider
             return $user->role === 'admin';
         });
 
-        Gate::define('karyawan', function ($user) {
-            return $user->role === 'karyawan';
+        Gate::define('finance', function ($user) {
+            return $user->role === 'finance';
         });
 
         Gate::define('owner', function ($user) {
             return in_array($user->role, ['owner']);
         });
 
-        Gate::define('admin|karyawan', function ($user) {
-            return in_array($user->role, ['admin', 'karyawan']);
+        Gate::define('admin|finance', function ($user) {
+            return in_array($user->role, ['admin', 'finance']);
         });
 
         Gate::define('owner|admin', function ($user) {
