@@ -23,8 +23,9 @@ class TransactionController extends Controller
         $customers = Customer::all();
         $spareparts = Sparepart::where('stok', '>', 0)->get();
         $kodeTransaksi = Transaction::generateKode();
+        $jenisServis = config('bengkel.jenis_servis');
         
-        return view('transactions.create', compact('customers', 'spareparts', 'kodeTransaksi'));
+        return view('transactions.create', compact('customers', 'spareparts', 'kodeTransaksi', 'jenisServis'));
     }
 
     public function getVehicles($customerId)

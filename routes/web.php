@@ -33,13 +33,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('vehicles', VehicleController::class);
     });
     
-    // CRUD Sparepart - Admin & finance
-    Route::middleware(['role:admin,finance'])->group(function () {
-        Route::resource('spareparts', SparepartController::class);
+    // Sparepart routes
+    // Allow viewing for owner, admin & finance
+    Route::middleware(['role:owner,admin,finance'])->group(function () {
+        Route::get('/spareparts', [SparepartController::class, 'index'])->name('spareparts.index');
+        Route::get('/spareparts/{sparepart}', [SparepartController::class, 'show'])
+            ->whereNumber('sparepart')
+            ->name('spareparts.show');
+    });
+
+    // Management (create/edit/delete) only for finance
+    Route::middleware(['role:finance'])->group(function () {
+        Route::get('/spareparts/create', [SparepartController::class, 'create'])->name('spareparts.create');
+        Route::post('/spareparts', [SparepartController::class, 'store'])->name('spareparts.store');
+        Route::get('/spareparts/{sparepart}/edit', [SparepartController::class, 'edit'])->name('spareparts.edit');
+        Route::put('/spareparts/{sparepart}', [SparepartController::class, 'update'])->name('spareparts.update');
+        Route::delete('/spareparts/{sparepart}', [SparepartController::class, 'destroy'])->name('spareparts.destroy');
     });
     
-    // CRUD Transaction - Admin & finance (Owner hanya bisa lihat)
-    Route::middleware(['role:admin,finance'])->group(function () {
+    // CRUD Transaction - Admin only (finance dan owner hanya lihat)
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
         Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
         Route::get('/transactions/{transaction}/edit', [TransactionController::class, 'edit'])->name('transactions.edit');

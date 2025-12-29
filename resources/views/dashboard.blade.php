@@ -314,75 +314,79 @@
             </div>
             <div class="card-body" style="padding: 30px;">
                 <div class="row">
-                    {{-- Tombol Transaksi - Admin & finance ONLY --}}
-                    @role('admin', 'finance')
+                    {{-- Transaksi: admin = buat, finance/owner = lihat saja --}}
+                    @if(auth()->check() && auth()->user()->isAdmin())
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('transactions.create') }}" class="btn btn-primary btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-plus-circle" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
                                 <strong>Transaksi Baru</strong>
                             </a>
                         </div>
-                    @endrole
-                    
-                    {{-- Tombol Pelanggan - Admin & finance ONLY --}}
-                    @role('admin', 'finance')
+                    @else
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
+                            <a href="{{ route('transactions.index') }}" class="btn btn-primary btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
+                                <i class="fas fa-list" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                                <strong>Lihat Transaksi</strong>
+                            </a>
+                        </div>
+                    @endif
+
+                    {{-- Tombol Pelanggan - Admin ONLY --}}
+                    @if(auth()->check() && auth()->user()->isAdmin())
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('customers.create') }}" class="btn btn-info btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-user-plus" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
                                 <strong>Tambah Pelanggan</strong>
                             </a>
                         </div>
-                    @endrole
-                    
-                    {{-- Tombol Kendaraan - Admin & finance ONLY --}}
-                    @role('admin', 'finance')
+                    @endif
+
+                    {{-- Tombol Kendaraan - Admin ONLY --}}
+                    @if(auth()->check() && auth()->user()->isAdmin())
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('vehicles.create') }}" class="btn btn-warning btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-car" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
                                 <strong>Tambah Kendaraan</strong>
                             </a>
                         </div>
-                    @endrole
-                    
-                    {{-- Tombol Sparepart - Admin & finance ONLY --}}
-                    @role('admin', 'finance')
+                    @endif
+
+                    {{-- Tombol Sparepart - finance dapat tambah, lainnya lihat saja --}}
+                    @if(auth()->check() && auth()->user()->isFinance())
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('spareparts.create') }}" class="btn btn-success btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-box" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
                                 <strong>Tambah Sparepart</strong>
                             </a>
                         </div>
-                    @endrole
-                    
-                    {{-- Tombol Laporan - Owner & Admin ONLY --}}
-                    @role('owner', 'admin')
+                    @else
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
+                            <a href="{{ route('spareparts.index') }}" class="btn btn-success btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
+                                <i class="fas fa-box" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                                <strong>Tambah Sparepart</strong>
+                            </a>
+                        </div>
+                    @endif
+
+                    {{-- Tombol Laporan - Owner, Admin & Finance --}}
+                    @if(auth()->check() && in_array(auth()->user()->role, ['owner','admin','finance']))
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('laporan.index') }}" class="btn btn-danger btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-chart-line" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
                                 <strong>Lihat Laporan</strong>
                             </a>
                         </div>
-                    @endrole
-                    
+                    @endif
+
                     {{-- Tombol Kelola User - Admin ONLY --}}
-                    @role('admin')
+                    @if(auth()->check() && auth()->user()->isAdmin())
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
                             <a href="{{ route('users.index') }}" class="btn btn-secondary btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
                                 <i class="fas fa-users-cog" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
                                 <strong>Kelola User</strong>
                             </a>
                         </div>
-                    @endrole
-                    
-                    {{-- Jika Owner, tampilkan tombol khusus owner --}}
-                    @role('owner')
-                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
-                            <a href="{{ route('transactions.index') }}" class="btn btn-info btn-block" style="padding: 30px 20px; font-size: 16px; border-radius: 10px;">
-                                <i class="fas fa-list" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
-                                <strong>Lihat Transaksi</strong>
-                            </a>
-                        </div>
-                    @endrole
+                    @endif
                 </div>
             </div>
         </div>

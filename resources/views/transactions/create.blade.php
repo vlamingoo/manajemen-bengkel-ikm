@@ -234,11 +234,11 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>3. Total Biaya Jasa</label>
-                            <input type="number" 
-                                name="biaya_jasa" 
-                                id="biaya_jasa" 
-                                class="form-control font-weight-bold" 
-                                value="0"
+                            <input type="text"
+                                name="biaya_jasa"
+                                id="biaya_jasa"
+                                class="form-control font-weight-bold"
+                                value="Rp 0"
                                 readonly
                                 style="background-color: #ffffffff; font-size: 18px; color: #5f5d5dff;"
                                 required>
@@ -280,194 +280,227 @@
     // Data jenis servis dari config
     let jenisServisData = @json($jenisServis);
 
-    // ========== BIAYA JASA CALCULATION ==========
+    // ========== BIAYA JASA CALCULATION - FIXED ==========
+
+let biayaJasaNumeric = 0; // Variable untuk menyimpan nilai numerik biaya jasa
+
+// Saat pilih jenis servis
+$('#jenis_servis').change(function() {
+    let selected = $(this).find(':selected');
+    let tarif = selected.data('tarif') || 0;
+    let satuan = selected.data('satuan') || '';
     
-    // Saat pilih jenis servis
-    $('#jenis_servis').change(function() {
-        let selected = $(this).find(':selected');
-        let tarif = selected.data('tarif') || 0;
-        let satuan = selected.data('satuan') || '';
-        
-        if(satuan) {
-            // Update satuan waktu
-            $('#satuan_waktu').text(satuan);
-            $('#hint_waktu').text(`Contoh: 1, 2, 3 ${satuan} (bisa desimal: 1.5, 2.5)`);
-            
-            // Hitung biaya jasa
-            hitungBiayaJasa();
-            
-            // Show formula
-            $('#formula_box').show();
-        } else {
-            $('#satuan_waktu').text('-');
-            $('#hint_waktu').text('Pilih jenis servis terlebih dahulu');
-            $('#biaya_jasa').val(0);
-            $('#formula_box').hide();
-            hitungTotalBiayaServis();
-        }
-    });
-    
-    // Saat input waktu pengerjaan
-    $('#waktu_pengerjaan').on('input', function() {
+    if(satuan) {
+        $('#satuan_waktu').text(satuan);
+        $('#hint_waktu').text(`Contoh: 1, 2, 3 ${satuan} (bisa desimal: 1.5, 2.5)`);
         hitungBiayaJasa();
-    });
-    
-    // Fungsi hitung biaya jasa
-    function hitungBiayaJasa() {
-        let selected = $('#jenis_servis').find(':selected');
-        let tarif = selected.data('tarif') || 0;
-        let satuan = selected.data('satuan') || 'jam';
-        let waktu = parseFloat($('#waktu_pengerjaan').val()) || 0;
-        
-        let biayaJasa = tarif * waktu;
-        
-        // Update biaya jasa
-        $('#biaya_jasa').val(biayaJasa);
-        $('#totalBiayaJasaDisplay').val('Rp ' + formatRupiah(biayaJasa));
-        
-        // Update formula text
-        $('#formula_text').html(
-            'Rp ' + formatRupiah(tarif) + ' × ' + waktu + ' ' + satuan + 
-            ' = <strong>Rp ' + formatRupiah(biayaJasa) + '</strong>'
-        );
-        
-        // Hitung total biaya servis
+        $('#formula_box').show();
+    } else {
+        $('#satuan_waktu').text('-');
+        $('#hint_waktu').text('Pilih jenis servis terlebih dahulu');
+        biayaJasaNumeric = 0;
+        $('#biaya_jasa').val('Rp 0');
+        $('#formula_box').hide();
         hitungTotalBiayaServis();
     }
-    
-    // Fungsi hitung total biaya servis (biaya jasa + sparepart)
-    function hitungTotalBiayaServis() {
-        let totalSparepart = 0;
-        
-        // Hitung total sparepart
-        $('.subtotal-display').each(function() {
-            let val = $(this).val().replace('Rp ', '').replace(/\./g, '');
-            totalSparepart += parseFloat(val) || 0;
-        });
-        
-        let biayaJasa = parseFloat($('#biaya_jasa').val()) || 0;
-        let totalBiayaServis = totalSparepart + biayaJasa;
-        
-        // Update display
-        $('#totalSparepart').val('Rp ' + formatRupiah(totalSparepart));
-        $('#totalBiayaServis').val('Rp ' + formatRupiah(totalBiayaServis));
-    }
+});
 
-    // ========== SPAREPART MANAGEMENT (Existing Code) ==========
+// Saat input waktu pengerjaan
+$('#waktu_pengerjaan').on('input', function() {
+    hitungBiayaJasa();
+});
+
+// Fungsi hitung biaya jasa
+function hitungBiayaJasa() {
+    let selected = $('#jenis_servis').find(':selected');
+    let tarif = selected.data('tarif') || 0;
+    let satuan = selected.data('satuan') || 'jam';
+    let waktu = parseFloat($('#waktu_pengerjaan').val()) || 0;
     
-    // Load vehicles saat customer dipilih
-    $('#customer_id').change(function() {
-        let customerId = $(this).val();
-        $('#vehicle_id').html('<option value="">Loading...</option>');
-        
-        if(customerId) {
-            $.get('/get-vehicles/' + customerId, function(data) {
-                let options = '<option value="">-- Pilih Kendaraan --</option>';
-                data.forEach(function(vehicle) {
-                    options += `<option value="${vehicle.id}">${vehicle.merk} ${vehicle.model} - ${vehicle.no_plat}</option>`;
-                });
-                $('#vehicle_id').html(options);
+    // Simpan nilai numerik
+    biayaJasaNumeric = tarif * waktu;
+    
+    // Update tampilan (dengan format Rupiah)
+    $('#biaya_jasa').val('Rp ' + formatRupiah(biayaJasaNumeric));
+    $('#totalBiayaJasaDisplay').val('Rp ' + formatRupiah(biayaJasaNumeric));
+    
+    // Update formula text
+    $('#formula_text').html(
+        'Rp ' + formatRupiah(tarif) + ' × ' + waktu + ' ' + satuan + 
+        ' = <strong>Rp ' + formatRupiah(biayaJasaNumeric) + '</strong>'
+    );
+    
+    // Hitung total biaya servis
+    hitungTotalBiayaServis();
+}
+
+// Fungsi hitung total biaya servis (biaya jasa + sparepart)
+function hitungTotalBiayaServis() {
+    let totalSparepart = 0;
+    
+    // Hitung total sparepart
+    $('.subtotal-display').each(function() {
+        let val = $(this).val().replace('Rp ', '').replace(/\./g, '');
+        totalSparepart += parseFloat(val) || 0;
+    });
+    
+    // Gunakan variable numerik langsung (tidak perlu parsing lagi)
+    let totalBiayaServis = totalSparepart + biayaJasaNumeric;
+    
+    // Update display
+    $('#totalSparepart').val('Rp ' + formatRupiah(totalSparepart));
+    $('#totalBiayaServis').val('Rp ' + formatRupiah(totalBiayaServis));
+}
+
+// ========== SPAREPART MANAGEMENT ==========
+
+// Load vehicles saat customer dipilih
+$('#customer_id').change(function() {
+    let customerId = $(this).val();
+    $('#vehicle_id').html('<option value="">Loading...</option>');
+    
+    if(customerId) {
+        $.get('/get-vehicles/' + customerId, function(data) {
+            let options = '<option value="">-- Pilih Kendaraan --</option>';
+            data.forEach(function(vehicle) {
+                options += `<option value="${vehicle.id}">${vehicle.merk} ${vehicle.model} - ${vehicle.no_plat}</option>`;
             });
-        } else {
-            $('#vehicle_id').html('<option value="">-- Pilih Pelanggan Dulu --</option>');
-        }
-    });
-
-    // Tambah baris sparepart
-    $('#addSparepart').click(function() {
-        let options = '<option value="">-- Pilih Sparepart --</option>';
-        
-        if (sparepartData.length === 0) {
-            alert('Tidak ada data sparepart! Silakan tambah sparepart terlebih dahulu.');
-            return;
-        }
-        
-        sparepartData.forEach(function(sp) {
-            let disabled = sp.stok === 0 ? 'disabled' : '';
-            let badge = '';
-            
-            if (sp.stok === 0) {
-                badge = ' ❌ STOK HABIS';
-            } else if (sp.stok < 5) {
-                badge = ' 🔴 KRITIS (Stok: ' + sp.stok + ')';
-            } else if (sp.stok < 10) {
-                badge = ' ⚠️ MENIPIS (Stok: ' + sp.stok + ')';
-            } else {
-                badge = ' ✅ (Stok: ' + sp.stok + ')';
-            }
-            
-            options += `<option value="${sp.id}" data-harga="${sp.harga}" ${disabled}>${sp.nama_sparepart}${badge}</option>`;
+            $('#vehicle_id').html(options);
         });
+    } else {
+        $('#vehicle_id').html('<option value="">-- Pilih Pelanggan Dulu --</option>');
+    }
+});
 
-        let newRow = `
-            <tr data-row="${rowIndex}">
-                <td>
-                    <select name="sparepart_id[]" class="form-control sparepart-select" data-row="${rowIndex}" required>
-                        ${options}
-                    </select>
-                </td>
-                <td>
-                    <input type="number" class="form-control harga-input" data-row="${rowIndex}" readonly>
-                </td>
-                <td>
-                    <input type="number" name="qty[]" class="form-control qty-input" data-row="${rowIndex}" min="1" value="1" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control subtotal-display" data-row="${rowIndex}" readonly>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-danger btn-sm remove-sparepart">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-
-        if($('#sparepartBody tr td[colspan]').length) {
-            $('#sparepartBody').html(newRow);
+// Tambah baris sparepart
+$('#addSparepart').click(function() {
+    let options = '<option value="">-- Pilih Sparepart --</option>';
+    
+    if (sparepartData.length === 0) {
+        alert('Tidak ada data sparepart! Silakan tambah sparepart terlebih dahulu.');
+        return;
+    }
+    
+    sparepartData.forEach(function(sp) {
+        let disabled = '';
+        let badge = '';
+        
+        // LOGIKA SAFETY STOCK KONSISTEN
+        if (sp.stok === 0) {
+            disabled = 'disabled';
+            badge = ' ❌ STOK HABIS';
+        } else if (sp.stok <= 3) {
+            disabled = 'disabled';
+            badge = ' 🔴 URGENT - SEGERA RESTOCK (Stok: ' + sp.stok + ')';
+        } else if (sp.stok <= 7) {
+            badge = ' 🟠 KRITIS (Stok: ' + sp.stok + ')';
+        } else if (sp.stok <= 15) {
+            badge = ' 🟡 MENIPIS (Stok: ' + sp.stok + ')';
         } else {
-            $('#sparepartBody').append(newRow);
-        }
-
-        rowIndex++;
-    });
-
-    // Hapus baris sparepart
-    $(document).on('click', '.remove-sparepart', function() {
-        $(this).closest('tr').remove();
-        
-        if($('#sparepartBody tr').length === 0) {
-            $('#sparepartBody').html('<tr><td colspan="5" class="text-center text-muted">Belum ada sparepart dipilih</td></tr>');
+            badge = ' ✅ (Stok: ' + sp.stok + ')';
         }
         
-        hitungTotalBiayaServis();
+        options += `<option value="${sp.id}" data-harga="${sp.harga}" data-stok="${sp.stok}" ${disabled}>${sp.nama_sparepart}${badge}</option>`;
     });
 
-    // Update harga saat sparepart dipilih
-    $(document).on('change', '.sparepart-select', function() {
-        let row = $(this).data('row');
-        let harga = $(this).find(':selected').data('harga') || 0;
-        $(`.harga-input[data-row="${row}"]`).val(harga);
-        hitungSubtotal(row);
-    });
+    let newRow = `
+        <tr data-row="${rowIndex}">
+            <td>
+                <select name="sparepart_id[]" class="form-control sparepart-select" data-row="${rowIndex}" required>
+                    ${options}
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control harga-input" data-row="${rowIndex}" readonly>
+            </td>
+            <td>
+                <input type="number" name="qty[]" class="form-control qty-input" data-row="${rowIndex}" min="1" value="1" required>
+            </td>
+            <td>
+                <input type="text" class="form-control subtotal-display" data-row="${rowIndex}" readonly>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm remove-sparepart">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `;
 
-    // Update subtotal saat qty berubah
-    $(document).on('input', '.qty-input', function() {
-        let row = $(this).data('row');
-        hitungSubtotal(row);
-    });
-
-    function hitungSubtotal(row) {
-        let harga = parseFloat($(`.harga-input[data-row="${row}"]`).val()) || 0;
-        let qty = parseFloat($(`.qty-input[data-row="${row}"]`).val()) || 0;
-        let subtotal = harga * qty;
-        
-        $(`.subtotal-display[data-row="${row}"]`).val('Rp ' + formatRupiah(subtotal));
-        hitungTotalBiayaServis();
+    if($('#sparepartBody tr td[colspan]').length) {
+        $('#sparepartBody').html(newRow);
+    } else {
+        $('#sparepartBody').append(newRow);
     }
 
-    function formatRupiah(angka) {
-        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    rowIndex++;
+});
+
+// Hapus baris sparepart
+$(document).on('click', '.remove-sparepart', function() {
+    $(this).closest('tr').remove();
+    
+    if($('#sparepartBody tr').length === 0) {
+        $('#sparepartBody').html('<tr><td colspan="5" class="text-center text-muted">Belum ada sparepart dipilih</td></tr>');
     }
+    
+    hitungTotalBiayaServis();
+});
+
+// Update harga saat sparepart dipilih
+$(document).on('change', '.sparepart-select', function() {
+    let row = $(this).data('row');
+    let harga = parseFloat($(this).find(':selected').data('harga')) || 0;
+    let stok = parseInt($(this).find(':selected').data('stok')) || 0;
+    
+    // Set max qty sesuai stok tersedia
+    $(`.qty-input[data-row="${row}"]`).attr('max', stok);
+    
+    // Tampilkan harga dengan format Rupiah
+    $(`.harga-input[data-row="${row}"]`).val('Rp ' + formatRupiah(harga)).data('harga', harga);
+    hitungSubtotal(row);
+});
+
+// Update subtotal saat qty berubah
+$(document).on('input', '.qty-input', function() {
+    let row = $(this).data('row');
+    let stok = parseInt($(`.sparepart-select[data-row="${row}"]`).find(':selected').data('stok')) || 0;
+    let qty = parseInt($(this).val()) || 0;
+    
+    // Validasi qty tidak melebihi stok
+    if (qty > stok) {
+        alert(`Qty tidak boleh melebihi stok tersedia (${stok})`);
+        $(this).val(stok);
+    }
+    
+    hitungSubtotal(row);
+});
+
+function hitungSubtotal(row) {
+    let harga = parseFloat($(`.harga-input[data-row="${row}"]`).data('harga')) || 0;
+    let qty = parseFloat($(`.qty-input[data-row="${row}"]`).val()) || 0;
+    let subtotal = harga * qty;
+    
+    $(`.subtotal-display[data-row="${row}"]`).val('Rp ' + formatRupiah(subtotal));
+    hitungTotalBiayaServis();
+}
+
+function formatRupiah(angka) {
+    return Math.round(angka).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Konversi sebelum submit: ubah format Rupiah ke numeric
+$('form').on('submit', function() {
+    // Konversi biaya_jasa dari format Rupiah ke numeric
+    $('#biaya_jasa').val(biayaJasaNumeric);
+    
+    // Validasi minimal
+    if (biayaJasaNumeric <= 0) {
+        alert('Biaya jasa harus lebih dari 0!');
+        return false;
+    }
+    
+    return true;
+});
 </script>
 @stop

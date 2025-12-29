@@ -16,9 +16,19 @@
 
     <div class="card">
         <div class="card-header">
-            <a href="{{ route('spareparts.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tambah Sparepart
-            </a>
+            @if(auth()->user() && auth()->user()->isFinance())
+                <a href="{{ route('spareparts.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Sparepart
+                </a>
+            @elseif(auth()->user() && auth()->user()->isOwner())
+                <a href="{{ route('spareparts.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Sparepart
+                </a>
+            @else
+                <a href="{{ route('spareparts.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Sparepart
+                </a>
+            @endif
         </div>
         <div class="card-body">
             <table class="table table-bordered table-striped">
@@ -53,16 +63,40 @@
                                 <a href="{{ route('spareparts.show', $sparepart->id) }}" class="btn btn-info btn-sm">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ route('spareparts.edit', $sparepart->id) }}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('spareparts.destroy', $sparepart->id) }}" method="POST" style="display:inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                @if(auth()->user() && auth()->user()->isFinance())
+                                    <a href="{{ route('spareparts.edit', $sparepart->id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('spareparts.destroy', $sparepart->id) }}" method="POST" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @elseif(auth()->user() && auth()->user()->isOwner())
+                                    <a href="{{ route('spareparts.edit', $sparepart->id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('spareparts.destroy', $sparepart->id) }}" method="POST" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('spareparts.edit', $sparepart->id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('spareparts.destroy', $sparepart->id) }}" method="POST" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

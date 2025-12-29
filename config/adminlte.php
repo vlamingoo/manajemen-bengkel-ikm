@@ -63,8 +63,8 @@ return [
     |
     */
 
-    'logo' => '<b>ZAFAVELIN</b>',
-    'logo_img' => 'vendor/adminlte/dist/img/infinity_ZAFAVELIN.png',
+    'logo' => '<b>ZIVIZ</b>',
+    'logo_img' => 'public/img/infinity_ZAFAVELIN.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -364,6 +364,11 @@ return [
             'route' => 'vehicles.index',
             'icon'  => 'fas fa-fw fa-car',
         ],
+            [
+                'text'  => 'Data Sparepart',
+                'route' => 'spareparts.index',
+                'icon'  => 'fas fa-fw fa-box',
+            ],
         [
             'text'  => 'Data Transaksi Servis',
             'route' => 'transactions.index', 
